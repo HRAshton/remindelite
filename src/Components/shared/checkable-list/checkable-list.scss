@@ -1,0 +1,13 @@
+.checkable-list {
+    .checkable-list-items {
+        padding-inline-start: 1em;
+        margin: 0;
+        overflow: auto;
+        padding: 0;
+    }
+
+    .checkable-list-item {
+        list-style-type: none;
+        position: relative;
+    }
+}

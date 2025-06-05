@@ -1,0 +1,54 @@
+.dashboard {
+    padding: 0.5em;
+    display: grid;
+
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr;
+    gap: 0.5em;
+    grid-template-areas:
+        "debts main-grid global-plans"
+        "remember main-grid near-plans"
+        "balance main-grid good-things"
+        "thoughts main-grid food";
+
+    background-color: var(--background);
+    width: calc(100% - 1em);
+    height: calc(100% - 1em);
+}
+
+.debts {
+    grid-area: debts;
+}
+
+.remember {
+    grid-area: remember;
+}
+
+.balance {
+    grid-area: balance;
+}
+
+.thoughts {
+    grid-area: thoughts;
+}
+
+.main-pane {
+    grid-area: main-grid;
+}
+
+.globalPlans {
+    grid-area: global-plans;
+}
+
+.nearPlans {
+    grid-area: near-plans;
+}
+
+.goodThings {
+    grid-area: good-things;
+}
+
+.food {
+    grid-area: food;
+}
+

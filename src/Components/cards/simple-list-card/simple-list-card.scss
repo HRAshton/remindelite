@@ -1,0 +1,18 @@
+.simple-list-card {
+    .simple-list-card-items {
+        padding-inline-start: 1em;
+        margin: 0;
+        overflow: auto;
+    }
+
+    .simple-list-card-item {
+        list-style-type: none;
+        position: relative;
+    }
+
+    .simple-list-card-item::before {
+        content: "–";
+        position: absolute;
+        left: -1em;
+    }
+}

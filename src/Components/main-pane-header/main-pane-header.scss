@@ -1,0 +1,29 @@
+.main-pane-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    & h2 {
+        margin: 0 0.5em;
+    }
+
+    & button {
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+        margin: 0 0.25em;
+        color: var(--text);
+        font-size: 1em;
+        outline: none;
+        box-shadow: 0 0 0 2px var(--text-secondary);
+        border-radius: 1em;
+        width: 1.5em;
+        height: 1.5em;
+        zoom: 0.75; // Adjust zoom for better button size
+
+        &:hover {
+            color: var(--text-secondary);
+        }
+    }
+}
