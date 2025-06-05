@@ -1,4 +1,4 @@
-export const VERSION = '1';
+export const VERSION = '2';
 
 export interface FoodData {
     comment: string;
@@ -11,8 +11,8 @@ export interface CheckableItem {
 }
 
 export interface DailyStoredData {
-    debts: string[];
-    remember: string[];
+    date: string;
+
     balance: string[];
     thoughts: string[];
 
@@ -20,8 +20,13 @@ export interface DailyStoredData {
     temporaryTasks: Record<string, CheckableItem[]>;
     energy: number;
 
-    globalPlans: string[];
-    nearPlans: string[];
     goodThings: string[];
     food: FoodData;
+}
+
+export interface PersistentData {
+    debts: string[];
+    remember: string[];
+    globalPlans: string[];
+    nearPlans: string[];
 }

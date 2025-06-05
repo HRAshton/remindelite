@@ -1,14 +1,37 @@
-import { DailyStoredData, VERSION } from "./entries";
+import { DailyStoredData, PersistentData, VERSION } from "./entries";
 
 export class Repository {
-    public getOrCreate(date: string): DailyStoredData {
+    public getPersistentData(): PersistentData {
+        const rawData = localStorage.getItem(`${VERSION}:persistent`);
+
+        return rawData
+            ? JSON.parse(rawData) as PersistentData
+            : {
+                debts: [],
+                remember: [],
+                globalPlans: [],
+                nearPlans: [],
+            };
+    }
+
+    public savePersistentData(data: PersistentData): void {
+        try {
+            localStorage.setItem(`${VERSION}:persistent`, JSON.stringify(data));
+        } catch (error) {
+            console.error("Error saving persistent data to localStorage:", error);
+            alert("Не удалось сохранить данные в локальное хранилище");
+            throw new Error("Failed to save persistent data");
+        }
+    }
+
+    public getOrCreateDailyData(date: string): DailyStoredData {
         const rawData = localStorage.getItem(`${VERSION}:daily:${date}`);
 
         return rawData
             ? JSON.parse(rawData) as DailyStoredData
             : {
-                debts: [],
-                remember: [],
+                date,
+
                 balance: [],
                 thoughts: [],
 
@@ -16,8 +39,6 @@ export class Repository {
                 temporaryTasks: {},
                 energy: 0,
 
-                globalPlans: [],
-                nearPlans: [],
                 goodThings: [],
                 food: {
                     comment: '',
@@ -26,7 +47,7 @@ export class Repository {
             };
     }
 
-    public save(date: string, data: DailyStoredData): void {
+    public saveDailyData(date: string, data: DailyStoredData): void {
         try {
             localStorage.setItem(`${VERSION}:daily:${date}`, JSON.stringify(data));
             this.saveLastRecurringTasks(data.recurringTasks);

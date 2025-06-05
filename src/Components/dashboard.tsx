@@ -12,36 +12,50 @@ export const Dashboard = () => {
     const [version, setVersion] = useState(0);
     const [selectedDate, setSelectedDate] = useState(today);
 
-    const dailyData = useMemo(() => {
-        return new Repository().getOrCreate(selectedDate);
-    }, [selectedDate, version]);
+    const persistentData = useMemo(
+        () => new Repository().getPersistentData(),
+        [version]);
+
+    const dailyData = useMemo(
+        () => new Repository().getOrCreateDailyData(selectedDate),
+        [selectedDate, version]);
 
     const incrementVersion = () => {
         setVersion(prev => prev + 1);
     }
 
-    const onDailyDataChange = (newData: DailyStoredData) => {
-        new Repository().save(selectedDate, newData);
+    const updatePersistentData = (newData: Partial<typeof persistentData>) => {
+        new Repository().savePersistentData({ ...persistentData, ...newData });
         incrementVersion();
     }
 
-    const onChangeSimpleList = (key: keyof DailyStoredData, newItems: string[]) => {
-        const updatedData = { ...dailyData, [key]: newItems };
-        onDailyDataChange(updatedData);
+    const onDailyDataChange = (newData: Partial<typeof dailyData>) => {
+        const updatedData = { ...dailyData, ...newData };
+        new Repository().saveDailyData(selectedDate, updatedData);
+        incrementVersion();
     }
 
-    const getSimpleListProps = (key: keyof DailyStoredData) => ({
+    const getPersistentSimpleListProps = (key: keyof typeof persistentData) => ({
+        items: persistentData[key] as string[],
+        onChange: (newItems: string[]) => {
+            updatePersistentData({ [key]: newItems });
+        },
+        className: key,
+    });
+
+    const getDailySimpleListProps = (key: keyof typeof dailyData) => ({
         items: dailyData[key] as string[],
-        onChange: (newItems: string[]) => onChangeSimpleList(key, newItems),
+        onChange: (newItems: string[]) =>
+            onDailyDataChange({ ...dailyData, [key]: newItems }),
         className: key,
     });
 
     return (
         <div className="dashboard">
-            <SimpleListCard {...getSimpleListProps('debts')} title="Долги" />
-            <SimpleListCard {...getSimpleListProps('remember')} title="Не забыть" />
-            <SimpleListCard {...getSimpleListProps('balance')} title="Доходы/расходы" />
-            <SimpleListCard {...getSimpleListProps('thoughts')} title="Мысли" />
+            <SimpleListCard {...getPersistentSimpleListProps('debts')} title="Долги" />
+            <SimpleListCard {...getPersistentSimpleListProps('remember')} title="Не забыть" />
+            <SimpleListCard {...getDailySimpleListProps('balance')} title="Доходы/расходы" />
+            <SimpleListCard {...getDailySimpleListProps('thoughts')} title="Мысли" />
 
             <MainPane
                 className="main-pane"
@@ -61,9 +75,9 @@ export const Dashboard = () => {
                 }}
             />
 
-            <SimpleListCard {...getSimpleListProps('globalPlans')} title="Глобальные планы" />
-            <SimpleListCard {...getSimpleListProps('nearPlans')} title="Ближайшие планы" />
-            <SimpleListCard {...getSimpleListProps('goodThings')} title="Хорошее за день" />
+            <SimpleListCard {...getPersistentSimpleListProps('globalPlans')} title="Глобальные планы" />
+            <SimpleListCard {...getPersistentSimpleListProps('nearPlans')} title="Ближайшие планы" />
+            <SimpleListCard {...getDailySimpleListProps('goodThings')} title="Хорошее за день" />
             <FoodCard
                 className="food"
                 data={dailyData.food}
