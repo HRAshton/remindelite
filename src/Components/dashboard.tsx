@@ -2,15 +2,23 @@ import './dashboard.scss';
 import { useMemo, useState } from 'react';
 import { MainPane } from './cards/main-pane/main-pane';
 import { Repository } from '../services/database/repository';
-import { CheckableItem, DailyStoredData } from '../services/database/entries';
+import { CheckableItem } from '../services/database/entries';
 import { SimpleListCard } from './cards/simple-list-card/simple-list-card';
 import { FoodCard } from './cards/food-card/food-card';
+import { HistoryModal } from './history-modal/history-modal';
+
+type HistoryModalData = {
+    title: string;
+    historyEntries: Record<string, string[]>;
+};
 
 const today = new Date().toISOString().split('T')[0];
 
 export const Dashboard = () => {
     const [version, setVersion] = useState(0);
     const [selectedDate, setSelectedDate] = useState(today);
+    const [historyModalData, setHistoryModalData]
+        = useState<HistoryModalData | undefined>(undefined);
 
     const persistentData = useMemo(
         () => new Repository().getPersistentData(),
@@ -43,19 +51,27 @@ export const Dashboard = () => {
         className: key,
     });
 
-    const getDailySimpleListProps = (key: keyof typeof dailyData) => ({
+    const showHistory = (key: keyof typeof dailyData, dataName: string) => {
+        const historyEntries = new Repository().getHistoricalData(key);
+        const title = `История записей: ${dataName}`;
+        setHistoryModalData({ title, historyEntries });
+    };
+
+    const getDailySimpleListProps = (key: keyof typeof dailyData, title: string) => ({
+        title,
         items: dailyData[key] as string[],
         onChange: (newItems: string[]) =>
             onDailyDataChange({ ...dailyData, [key]: newItems }),
         className: key,
+        onTitleClick: () => showHistory(key, title),
     });
 
     return (
         <div className="dashboard">
             <SimpleListCard {...getPersistentSimpleListProps('debts')} title="Долги" />
             <SimpleListCard {...getPersistentSimpleListProps('remember')} title="Не забыть" />
-            <SimpleListCard {...getDailySimpleListProps('balance')} title="Доходы/расходы" />
-            <SimpleListCard {...getDailySimpleListProps('thoughts')} title="Мысли" />
+            <SimpleListCard {...getDailySimpleListProps('balance', "Доходы/расходы")} />
+            <SimpleListCard {...getDailySimpleListProps('thoughts', "Мысли")} />
 
             <MainPane
                 className="main-pane"
@@ -73,17 +89,33 @@ export const Dashboard = () => {
                 onEnergyChange={(newEnergy: number) => {
                     onDailyDataChange({ ...dailyData, energy: newEnergy });
                 }}
+                tiredness={dailyData.tiredness}
+                onTirednessChange={(newTiredness: number) => {
+                    onDailyDataChange({ ...dailyData, tiredness: newTiredness });
+                }}
+                sleepHours={dailyData.sleepHours}
+                onSleepHoursChange={(newSleepHours: number) => {
+                    onDailyDataChange({ ...dailyData, sleepHours: newSleepHours });
+                }}
             />
 
             <SimpleListCard {...getPersistentSimpleListProps('globalPlans')} title="Глобальные планы" />
             <SimpleListCard {...getPersistentSimpleListProps('nearPlans')} title="Ближайшие планы" />
-            <SimpleListCard {...getDailySimpleListProps('goodThings')} title="Хорошее за день" />
+            <SimpleListCard {...getDailySimpleListProps('goodThings', "Хорошее за день")} />
             <FoodCard
                 className="food"
                 data={dailyData.food}
                 onChange={(newFood) => {
                     onDailyDataChange({ ...dailyData, food: newFood });
                 }} />
+
+
+            <HistoryModal
+                title={historyModalData?.title}
+                historyEntries={historyModalData?.historyEntries}
+                onClose={() => setHistoryModalData(undefined)}
+            />
         </div>
-    );
+
+    )
 };

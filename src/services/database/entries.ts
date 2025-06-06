@@ -19,6 +19,8 @@ export interface DailyStoredData {
     recurringTasks: CheckableItem[];
     temporaryTasks: Record<string, CheckableItem[]>;
     energy: number;
+    tiredness: number;
+    sleepHours: number;
 
     goodThings: string[];
     food: FoodData;

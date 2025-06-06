@@ -1,0 +1,49 @@
+.history-modal {
+    position: absolute;
+    inset: 40px;
+    border: 1px solid rgb(204, 204, 204);
+    background: rgb(255, 255, 255);
+    overflow: auto;
+    border-radius: 4px;
+    outline: none;
+    padding: 20px;
+
+    .history-modal-header {
+        border-bottom: 1px solid #dee2e6;
+        width: 100%;
+        text-align: center;
+        display: inline-flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 1ex;
+
+        h2 {
+            margin: 0;
+        }
+
+        button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            margin: 0 0.25em;
+            color: var(--text);
+            font-size: 1em;
+            outline: none;
+            box-shadow: 0 0 0 2px var(--text-secondary);
+            border-radius: 1em;
+            width: 1.5em;
+            height: 1.5em;
+
+            &:hover {
+                color: var(--text-secondary);
+            }
+        }
+    }
+
+    .history-modal-content {
+        background-color: #ffffff;
+        border-radius: 5px;
+        overflow-y: auto;
+    }
+}

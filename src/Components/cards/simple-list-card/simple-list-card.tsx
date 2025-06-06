@@ -9,6 +9,7 @@ export interface SimpleListCardProps {
     onChange: (newItems: string[]) => void;
     title: string;
     className?: string;
+    onTitleClick?: () => void;
 }
 
 export const SimpleListCard = (props: SimpleListCardProps) => {
@@ -43,6 +44,7 @@ export const SimpleListCard = (props: SimpleListCardProps) => {
         <BaseCard
             className={`simple-list-card ${props.className || ""}`}
             header={<h2>{props.title}</h2>}
+            onHeaderClick={props.onTitleClick}
         >
             <AppendableList
                 newItemFactory={() => ""}

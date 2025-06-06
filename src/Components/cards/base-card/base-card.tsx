@@ -1,20 +1,24 @@
 import './base-card.scss';
 
 export interface BaseCardProps {
-    className?: string;
     header: React.ReactNode;
     children: React.ReactNode;
+    className?: string;
+    onHeaderClick?: () => void;
 }
 
-export const BaseCard = ({ header, children, className }: BaseCardProps) => {
+export const BaseCard = (props: BaseCardProps) => {
     return (
-        <div className={`card ${className}`}>
-            <div className="card-header">
-                {header}
+        <div className={`card ${props.className}`}>
+            <div
+                className={`card-header ${props.onHeaderClick ? 'card-header-clickable' : ''}`}
+                onClick={props.onHeaderClick}
+            >
+                {props.header}
             </div>
             <hr />
             <div className="card-content">
-                {children}
+                {props.children}
             </div>
         </div>
     );

@@ -18,6 +18,12 @@ export interface MainPaneProps {
     energy: number;
     onEnergyChange: (newEnergy: number) => void;
 
+    tiredness: number;
+    onTirednessChange: (newTiredness: number) => void;
+
+    sleepHours: number;
+    onSleepHoursChange: (newSleepHours: number) => void;
+
     className: string;
 }
 
@@ -89,18 +95,34 @@ export const MainPane = (props: MainPaneProps) => {
             </div>
 
             <div className="stats-summary">
-                <span className="energy-title">
-                    Настроение дня:
-                </span>
-
+                <span>Настроение дня:</span>
                 <input
-                    className="energy-input"
+                    className="stats-summary-input"
                     type="number"
                     value={props.energy}
                     onChange={(e) => props.onEnergyChange(Number(e.target.value))}
                     min="0"
                     max="100"
-                    placeholder="Энергия"
+                />
+
+                <span>Усталость дня:</span>
+                <input
+                    className="stats-summary-input"
+                    type="number"
+                    value={props.tiredness}
+                    onChange={(e) => props.onTirednessChange(Number(e.target.value))}
+                    min="0"
+                    max="100"
+                />
+
+                <span>Часы сна:</span>
+                <input
+                    className="stats-summary-input"
+                    type="number"
+                    value={props.sleepHours}
+                    onChange={(e) => props.onSleepHoursChange(Number(e.target.value))}
+                    min="0"
+                    max="24"
                 />
 
                 <span className="completed-title">

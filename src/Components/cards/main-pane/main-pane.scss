@@ -1,22 +1,23 @@
 .main-pane {
+    display: flex;
+    flex-direction: column;
     height: 100%;
     max-height: calc(100% - 0.5em);
-    grid-row: 1 / span 4;
-
-    .main-pane {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-    }
 
     .stats-summary {
         display: grid;
-        grid-template:
-            "energy-title energy-input"
-            "completed-title completed-value" / 1fr 1fr;
         grid-gap: 0 0.5em;
         width: fit-content;
         align-self: flex-end;
+        grid-template-columns: 1fr auto;
+
+        .stats-summary-input {
+            width: 100%;
+            background-color: transparent;
+            border: none;
+            color: var(--text-color);
+            font-size: inherit;
+        }
     }
 
     .stats-details {

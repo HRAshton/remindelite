@@ -38,6 +38,8 @@ export class Repository {
                 recurringTasks: this.getLastRecurringTasks() || [],
                 temporaryTasks: {},
                 energy: 0,
+                tiredness: 0,
+                sleepHours: 0,
 
                 goodThings: [],
                 food: {
@@ -56,6 +58,27 @@ export class Repository {
             alert("Не удалось сохранить данные в локальное хранилище");
             throw new Error("Failed to save daily data");
         }
+    }
+
+    public getHistoricalData(key: keyof DailyStoredData): Record<string, string[]> {
+        const result: Record<string, string[]> = {};
+
+        Object.keys(localStorage)
+            .filter(key => key.startsWith(`${VERSION}:daily:`))
+            .map(key => JSON.parse(localStorage.getItem(key) || '{}'))
+            .filter((data: DailyStoredData) =>
+                data[key] !== undefined
+                && Array.isArray(data[key])
+                && (data[key] as string[]).length > 0)
+            .forEach((data: DailyStoredData) => {
+                const date = data.date;
+                if (!result[date]) {
+                    result[date] = [];
+                }
+                result[date].push(...(data[key] as string[]));
+            });
+
+        return result;
     }
 
     private getLastRecurringTasks(): DailyStoredData["recurringTasks"] | null {
