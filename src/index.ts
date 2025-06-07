@@ -24,6 +24,10 @@ const windowService = new WindowService(
 );
 const trayService = new TrayService(windowService, iconPath, app);
 
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+}
+
 app.on('ready', () => {
   databaseService.initialize();
   trayService.initialize();
