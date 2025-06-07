@@ -1,8 +1,8 @@
 import './dashboard.scss';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MainPane } from './cards/main-pane/main-pane';
 import { Repository } from '../services/database/repository';
-import { CheckableItem } from '../services/database/entries';
+import { CheckableItem, PersistentData } from '../services/database/entries';
 import { SimpleListCard } from './cards/simple-list-card/simple-list-card';
 import { FoodCard } from './cards/food-card/food-card';
 import { HistoryModal } from './history-modal/history-modal';
@@ -14,26 +14,46 @@ type HistoryModalData = {
 
 const today = new Date().toISOString().split('T')[0];
 
+const useMemoAsync = <T extends unknown>(fn: () => Promise<T>, deps: any[]) => {
+    const [value, setValue] = useState<T | undefined>(undefined);
+    useEffect(() => {
+        let isMounted = true;
+        fn().then(result => {
+            if (isMounted) {
+                setValue(result);
+            }
+        });
+        return () => {
+            isMounted = false;
+        };
+    }, deps);
+    return value;
+};
+
 export const Dashboard = () => {
     const [version, setVersion] = useState(0);
     const [selectedDate, setSelectedDate] = useState(today);
     const [historyModalData, setHistoryModalData]
         = useState<HistoryModalData | undefined>(undefined);
 
-    const persistentData = useMemo(
+    const persistentData = useMemoAsync(
         () => new Repository().getPersistentData(),
         [version]);
 
-    const dailyData = useMemo(
+    const dailyData = useMemoAsync(
         () => new Repository().getOrCreateDailyData(selectedDate),
         [selectedDate, version]);
+    
+    if (!persistentData || !dailyData) {
+        return <div className="loading">Загрузка...</div>;
+    }
 
     const incrementVersion = () => {
         setVersion(prev => prev + 1);
     }
 
-    const updatePersistentData = (newData: Partial<typeof persistentData>) => {
-        new Repository().savePersistentData({ ...persistentData, ...newData });
+    const updatePersistentData = async (newData: Partial<typeof persistentData>) => {
+        await new Repository().savePersistentData({ ...persistentData, ...newData });
         incrementVersion();
     }
 
@@ -51,8 +71,8 @@ export const Dashboard = () => {
         className: key,
     });
 
-    const showHistory = (key: keyof typeof dailyData, dataName: string) => {
-        const historyEntries = new Repository().getHistoricalData(key);
+    const showHistory = async (key: keyof typeof dailyData, dataName: string) => {
+        const historyEntries = await new Repository().getHistoricalData(key);
         const title = `История записей: ${dataName}`;
         setHistoryModalData({ title, historyEntries });
     };

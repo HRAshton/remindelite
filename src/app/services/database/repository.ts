@@ -1,8 +1,15 @@
 import { DailyStoredData, PersistentData, VERSION } from "./entries";
+import { ExternalStorage } from "./external-storage";
 
 export class Repository {
-    public getPersistentData(): PersistentData {
-        const rawData = localStorage.getItem(`${VERSION}:persistent`);
+    private readonly externalStorage: ExternalStorage;
+
+    constructor() {
+        this.externalStorage = new ExternalStorage();
+    }
+
+    public async getPersistentData(): Promise<PersistentData> {
+        const rawData = await this.externalStorage.getItem(`${VERSION}:persistent`);
 
         return rawData
             ? JSON.parse(rawData) as PersistentData
@@ -14,18 +21,18 @@ export class Repository {
             };
     }
 
-    public savePersistentData(data: PersistentData): void {
+    public async savePersistentData(data: PersistentData): Promise<void> {
         try {
-            localStorage.setItem(`${VERSION}:persistent`, JSON.stringify(data));
+            this.externalStorage.setItem(`${VERSION}:persistent`, JSON.stringify(data));
         } catch (error) {
-            console.error("Error saving persistent data to localStorage:", error);
+            console.error("Error saving persistent data to externalStorage:", error);
             alert("Не удалось сохранить данные в локальное хранилище");
             throw new Error("Failed to save persistent data");
         }
     }
 
-    public getOrCreateDailyData(date: string): DailyStoredData {
-        const rawData = localStorage.getItem(`${VERSION}:daily:${date}`);
+    public async getOrCreateDailyData(date: string): Promise<DailyStoredData> {
+        const rawData = await this.externalStorage.getItem(`${VERSION}:daily:${date}`);
 
         return rawData
             ? JSON.parse(rawData) as DailyStoredData
@@ -35,7 +42,7 @@ export class Repository {
                 balance: [],
                 thoughts: [],
 
-                recurringTasks: this.getLastRecurringTasks() || [],
+                recurringTasks: await this.getLastRecurringTasks() || [],
                 temporaryTasks: {},
                 energy: 0,
                 tiredness: 0,
@@ -49,23 +56,25 @@ export class Repository {
             };
     }
 
-    public saveDailyData(date: string, data: DailyStoredData): void {
+    public async saveDailyData(date: string, data: DailyStoredData): Promise<void> {
         try {
-            localStorage.setItem(`${VERSION}:daily:${date}`, JSON.stringify(data));
+            this.externalStorage.setItem(`${VERSION}:daily:${date}`, JSON.stringify(data));
             this.saveLastRecurringTasks(data.recurringTasks);
         } catch (error) {
-            console.error("Error saving daily data to localStorage:", error);
+            console.error("Error saving daily data to externalStorage:", error);
             alert("Не удалось сохранить данные в локальное хранилище");
             throw new Error("Failed to save daily data");
         }
     }
 
-    public getHistoricalData(key: keyof DailyStoredData): Record<string, string[]> {
+    public async getHistoricalData(key: keyof DailyStoredData): Promise<Record<string, string[]>> {
         const result: Record<string, string[]> = {};
 
-        Object.keys(localStorage)
+        const allItems = await this.externalStorage.getAllData();
+
+        const keys = Object.keys(allItems)
             .filter(key => key.startsWith(`${VERSION}:daily:`))
-            .map(key => JSON.parse(localStorage.getItem(key) || '{}'))
+            .map(key => JSON.parse(allItems[key] || '{}'))
             .filter((data: DailyStoredData) =>
                 data[key] !== undefined
                 && Array.isArray(data[key])
@@ -81,9 +90,9 @@ export class Repository {
         return result;
     }
 
-    private getLastRecurringTasks(): DailyStoredData["recurringTasks"] | null {
+    private async getLastRecurringTasks(): Promise<DailyStoredData["recurringTasks"] | null> {
         try {
-            const rawData = localStorage.getItem(`${VERSION}:last-recurring-tasks`);
+            const rawData = await this.externalStorage.getItem(`${VERSION}:last-recurring-tasks`);
             if (!rawData) {
                 return null;
             }
@@ -91,20 +100,20 @@ export class Repository {
             const tasks = JSON.parse(rawData) as string[];
             return tasks.map(task => ({ label: task, checked: false }));
         } catch (error) {
-            console.error("Error parsing last recurring tasks from localStorage:", error);
+            console.error("Error parsing last recurring tasks from externalStorage:", error);
             alert("Не удалось загрузить последние повторяющиеся задачи из локального хранилища");
             return null;
         }
     }
 
-    private saveLastRecurringTasks(recurringTasks: DailyStoredData["recurringTasks"]): void {
+    private async saveLastRecurringTasks(recurringTasks: DailyStoredData["recurringTasks"]): Promise<void> {
         try {
             const tasks = recurringTasks
                 .map(task => task.label.trim())
                 .filter(task => task !== "");
-            localStorage.setItem(`${VERSION}:last-recurring-tasks`, JSON.stringify(tasks));
+            await this.externalStorage.setItem(`${VERSION}:last-recurring-tasks`, JSON.stringify(tasks));
         } catch (error) {
-            console.error("Error saving last recurring tasks to localStorage:", error);
+            console.error("Error saving last recurring tasks to externalStorage:", error);
             alert("Не удалось сохранить последние повторяющиеся задачи в локальное хранилище");
             throw new Error("Failed to save last recurring tasks");
         }

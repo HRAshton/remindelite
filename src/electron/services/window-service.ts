@@ -50,6 +50,7 @@ export class WindowService {
             alwaysOnTop: this._isAlwaysOnTop,
             webPreferences: {
                 preload: this.MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+                nodeIntegration: true,
             },
         });
 
