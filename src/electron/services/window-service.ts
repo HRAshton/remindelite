@@ -1,8 +1,9 @@
 import { BrowserWindow } from "electron";
+import { Config } from "../../common/config";
 
 export class WindowService {
     private _mainWindow: BrowserWindow | null = null;
-    private _isAlwaysOnTop: boolean = true;
+    private _isAlwaysOnTop: boolean = Config.AlwaysOnTopDefault;
 
     constructor(
         private readonly MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string,

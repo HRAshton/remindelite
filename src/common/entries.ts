@@ -1,5 +1,3 @@
-export const VERSION = '2';
-
 export interface FoodData {
     comment: string;
     image: string;

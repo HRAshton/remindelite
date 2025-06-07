@@ -1,6 +1,6 @@
 import './main-pane.scss';
 import { useMemo } from 'react';
-import { CheckableItem } from "../../../services/database/entries";
+import { CheckableItem } from "../../../../common/entries";
 import { MainPaneHeader } from "../../main-pane-header/main-pane-header";
 import { BaseCard } from "../base-card/base-card";
 import { CheckableList } from '../../shared/checkable-list/checkable-list';

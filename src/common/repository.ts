@@ -1,23 +1,17 @@
-import { DailyStoredData, PersistentData, VERSION } from "./entries";
-import { ExternalStorage } from "./external-storage";
+import type { DailyStoredData, PersistentData } from "./entries";
+
+interface ExternalStorage {
+    getData(key: string): Promise<string | null>;
+    setData(key: string, value: string): Promise<void>;
+    getAllData(): Promise<Record<string, string>>;
+}
 
 export class Repository {
-    private static _instance: Repository | null = null;
-    private readonly _externalStorage: ExternalStorage;
-
-    private constructor() {
-        this._externalStorage = new ExternalStorage();
-    }
-
-    public static get instance(): Repository {
-        if (!Repository._instance) {
-            Repository._instance = new Repository();
-        }
-        return Repository._instance;
+    public constructor(private readonly externalStorage: ExternalStorage) {
     }
 
     public async getPersistentData(): Promise<PersistentData> {
-        const rawData = await this._externalStorage.getItem(`${VERSION}:persistent`);
+        const rawData = await this.externalStorage.getData(`persistent`);
 
         return rawData
             ? JSON.parse(rawData) as PersistentData
@@ -31,7 +25,7 @@ export class Repository {
 
     public async savePersistentData(data: PersistentData): Promise<void> {
         try {
-            this._externalStorage.setItem(`${VERSION}:persistent`, JSON.stringify(data));
+            this.externalStorage.setData(`persistent`, JSON.stringify(data));
         } catch (error) {
             console.error("Error saving persistent data to externalStorage:", error);
             alert("Не удалось сохранить данные в локальное хранилище");
@@ -39,34 +33,36 @@ export class Repository {
         }
     }
 
+    public async getDailyData(date: string): Promise<DailyStoredData | null> {
+        const rawData = await this.externalStorage.getData(`daily:${date}`);
+        return rawData ? JSON.parse(rawData) as DailyStoredData : null;
+    }
+
     public async getOrCreateDailyData(date: string): Promise<DailyStoredData> {
-        const rawData = await this._externalStorage.getItem(`${VERSION}:daily:${date}`);
+        const existingData = await this.getDailyData(date);
+        return existingData ?? {
+            date,
 
-        return rawData
-            ? JSON.parse(rawData) as DailyStoredData
-            : {
-                date,
+            balance: [],
+            thoughts: [],
 
-                balance: [],
-                thoughts: [],
+            recurringTasks: await this.getLastRecurringTasks() || [],
+            temporaryTasks: {},
+            energy: 0,
+            tiredness: 0,
+            sleepHours: 0,
 
-                recurringTasks: await this.getLastRecurringTasks() || [],
-                temporaryTasks: {},
-                energy: 0,
-                tiredness: 0,
-                sleepHours: 0,
-
-                goodThings: [],
-                food: {
-                    comment: '',
-                    image: '',
-                },
-            };
+            goodThings: [],
+            food: {
+                comment: '',
+                image: '',
+            },
+        };
     }
 
     public async saveDailyData(date: string, data: DailyStoredData): Promise<void> {
         try {
-            this._externalStorage.setItem(`${VERSION}:daily:${date}`, JSON.stringify(data));
+            this.externalStorage.setData(`daily:${date}`, JSON.stringify(data));
             this.saveLastRecurringTasks(data.recurringTasks);
         } catch (error) {
             console.error("Error saving daily data to externalStorage:", error);
@@ -78,10 +74,10 @@ export class Repository {
     public async getHistoricalData(key: keyof DailyStoredData): Promise<Record<string, string[]>> {
         const result: Record<string, string[]> = {};
 
-        const allItems = await this._externalStorage.getAllData();
+        const allItems = await this.externalStorage.getAllData();
 
         const keys = Object.keys(allItems)
-            .filter(key => key.startsWith(`${VERSION}:daily:`))
+            .filter(key => key.startsWith(`daily:`))
             .map(key => JSON.parse(allItems[key] || '{}'))
             .filter((data: DailyStoredData) =>
                 data[key] !== undefined
@@ -100,7 +96,7 @@ export class Repository {
 
     private async getLastRecurringTasks(): Promise<DailyStoredData["recurringTasks"] | null> {
         try {
-            const rawData = await this._externalStorage.getItem(`${VERSION}:last-recurring-tasks`);
+            const rawData = await this.externalStorage.getData(`last-recurring-tasks`);
             if (!rawData) {
                 return null;
             }
@@ -119,7 +115,7 @@ export class Repository {
             const tasks = recurringTasks
                 .map(task => task.label.trim())
                 .filter(task => task !== "");
-            await this._externalStorage.setItem(`${VERSION}:last-recurring-tasks`, JSON.stringify(tasks));
+            await this.externalStorage.setData(`last-recurring-tasks`, JSON.stringify(tasks));
         } catch (error) {
             console.error("Error saving last recurring tasks to externalStorage:", error);
             alert("Не удалось сохранить последние повторяющиеся задачи в локальное хранилище");

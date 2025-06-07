@@ -1,5 +1,5 @@
 import './food-card.scss';
-import { FoodData } from "../../../services/database/entries";
+import { FoodData } from "../../../../common/entries";
 import { BaseCard } from "../base-card/base-card";
 import { EditableLabel } from "../../../Components/shared/editable-label/editable-label";
 import { PastableImage } from '../../../Components/shared/pastable-image/pastable-image';

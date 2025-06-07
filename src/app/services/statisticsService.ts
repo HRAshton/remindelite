@@ -1,4 +1,4 @@
-import { Repository } from "./database/repository";
+import { Repository } from "../../common/repository";
 
 export interface StatisticsData {
     [key: string]: number;

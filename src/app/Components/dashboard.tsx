@@ -1,13 +1,14 @@
 import './dashboard.scss';
 import { useEffect, useMemo, useState } from 'react';
+import type { CheckableItem } from '../../common/entries';
+import { Repository } from '../../common/repository';
 import { MainPane } from './cards/main-pane/main-pane';
-import { Repository } from '../services/database/repository';
-import { CheckableItem } from '../services/database/entries';
 import { SimpleListCard } from './cards/simple-list-card/simple-list-card';
 import { FoodCard } from './cards/food-card/food-card';
 import { HistoryModal } from './history-modal/history-modal';
 import { StatisticsModal } from './statistics-modal/statistics-modal';
 import { StatisticsData, StatisticsService } from '../services/statisticsService';
+import { ExternalStorage } from '../services/database/external-storage';
 
 type HistoryModalData = {
     title: string;
@@ -40,7 +41,7 @@ export const Dashboard = () => {
     const [statisticsModalData, setStatisticsModalData]
         = useState<StatisticsData | undefined>(undefined);
 
-    const repository = useMemo(() => Repository.instance, []);
+    const repository = useMemo(() => new Repository(new ExternalStorage()), []);
     const statisticsService = useMemo(
         () => new StatisticsService(repository),
         [repository]);

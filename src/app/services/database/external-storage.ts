@@ -1,9 +1,9 @@
 export class ExternalStorage {
-    public getItem(key: string): Promise<string | null> {
+    public getData(key: string): Promise<string | null> {
         return window.electron.getData(key);
     }
 
-    public setItem(key: string, value: string): Promise<void> {
+    public setData(key: string, value: string): Promise<void> {
         return window.electron.setData(key, value);
     }
 
