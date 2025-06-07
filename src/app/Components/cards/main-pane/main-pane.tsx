@@ -24,6 +24,8 @@ export interface MainPaneProps {
     sleepHours: number;
     onSleepHoursChange: (newSleepHours: number) => void;
 
+    openStatisticsModal: () => void;
+
     className: string;
 }
 
@@ -134,7 +136,7 @@ export const MainPane = (props: MainPaneProps) => {
             </div>
 
             <div className="stats-details">
-                <button onClick={() => { }}>
+                <button onClick={props.openStatisticsModal}>
                     Статистика
                 </button>
             </div>
