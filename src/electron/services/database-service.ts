@@ -1,12 +1,10 @@
 import { ipcMain } from 'electron';
-import path from 'path';
 import Database from 'better-sqlite3';
 
 export class DatabaseService {
     private readonly db: Database.Database;
 
-    constructor(app: Electron.App) {
-        const dbPath = path.join(app.getPath('appData'), 'remindelite', 'database.db');
+    constructor(dbPath: string) {
         this.db = new Database(dbPath);
     }
 
