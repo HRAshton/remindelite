@@ -110,6 +110,15 @@ export class Repository {
         }
     }
 
+    public async getAllForStatistics(): Promise<DailyStoredData[]> {
+        const allItems = await this.externalStorage.getAllData();
+        const dailyData = Object.keys(allItems)
+            .filter(key => key.startsWith(`daily:`))
+            .map(key => JSON.parse(allItems[key]));
+
+        return dailyData;
+    }
+
     private async saveLastRecurringTasks(recurringTasks: DailyStoredData["recurringTasks"]): Promise<void> {
         try {
             const tasks = recurringTasks

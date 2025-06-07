@@ -58,6 +58,7 @@
     "electron-squirrel-startup": "^1.0.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-modal": "^3.16.3"
+    "react-modal": "^3.16.3",
+    "react-tabs": "^6.1.0"
   }
 }

@@ -7,7 +7,6 @@ import { SimpleListCard } from './cards/simple-list-card/simple-list-card';
 import { FoodCard } from './cards/food-card/food-card';
 import { HistoryModal } from './history-modal/history-modal';
 import { StatisticsModal } from './statistics-modal/statistics-modal';
-import { StatisticsData, StatisticsService } from '../services/statisticsService';
 import { ExternalStorage } from '../services/database/external-storage';
 
 type HistoryModalData = {
@@ -38,13 +37,9 @@ export const Dashboard = () => {
     const [selectedDate, setSelectedDate] = useState(today);
     const [historyModalData, setHistoryModalData]
         = useState<HistoryModalData | undefined>(undefined);
-    const [statisticsModalData, setStatisticsModalData]
-        = useState<StatisticsData | undefined>(undefined);
+    const [isStatisticsModalOpen, setIsStatisticsModalOpen] = useState(false);
 
     const repository = useMemo(() => new Repository(new ExternalStorage()), []);
-    const statisticsService = useMemo(
-        () => new StatisticsService(repository),
-        [repository]);
 
     const persistentData = useMemoAsync(
         () => repository.getPersistentData(),
@@ -96,11 +91,6 @@ export const Dashboard = () => {
         onTitleClick: () => showHistory(key, title),
     });
 
-    const openStatisticsModal = async () => {
-        const statistics = await statisticsService.getStatistics();
-        setStatisticsModalData(statistics);
-    };
-
     return (
         <div className="dashboard">
             <SimpleListCard {...getPersistentSimpleListProps('debts')} title="Долги" />
@@ -110,7 +100,7 @@ export const Dashboard = () => {
 
             <MainPane
                 className="main-pane"
-                openStatisticsModal={openStatisticsModal}
+                openStatisticsModal={() => setIsStatisticsModalOpen(true)}
                 currentDate={selectedDate}
                 onDateChange={setSelectedDate}
                 recurringTasks={dailyData.recurringTasks}
@@ -152,10 +142,12 @@ export const Dashboard = () => {
                 onClose={() => setHistoryModalData(undefined)}
             />
 
-            <StatisticsModal
-                statistics={statisticsModalData}
-                onClose={() => setStatisticsModalData(undefined)}
-            />
+            {isStatisticsModalOpen && (
+                <StatisticsModal
+                    repository={repository}
+                    onClose={() => setIsStatisticsModalOpen(false)}
+                />
+            )}
         </div>
 
     )
