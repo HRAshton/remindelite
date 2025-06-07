@@ -9,7 +9,7 @@
         grid-gap: 0 0.5em;
         width: fit-content;
         align-self: flex-end;
-        grid-template-columns: 1fr auto;
+        grid-template-columns: auto 3em auto;
 
         .stats-summary-input {
             width: 100%;

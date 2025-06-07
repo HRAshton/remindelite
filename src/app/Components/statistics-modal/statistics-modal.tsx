@@ -1,10 +1,12 @@
 import './statistics-modal.scss';
 import 'react-tabs/style/react-tabs.css';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import { Repository } from '../../../common/repository';
 import { StatisticsService, Grouping, type StatisticsData } from '../../services/statistics-service';
 import { SimpleModal } from '../simple-modal/simple-modal';
+import { StatisticsChart } from './charts/statistics-chart';
+import { Heatmap } from './charts/heatmap';
 
 export interface StatisticsModalProps {
     repository: Repository;
@@ -20,10 +22,7 @@ export const StatisticsModal: React.FC<StatisticsModalProps> = (props) => {
         statisticsService.getStatistics().then(setStatistics);
     }, [props.repository]);
 
-    const groupedStatistics = useMemo(
-        () => StatisticsService.groupBy(statistics?.countsByDay, grouping),
-        [statistics, grouping]
-    );
+    const groupedStatistics = StatisticsService.groupBy(statistics?.countsByDay, grouping);
 
     return (
         <SimpleModal
@@ -50,13 +49,23 @@ export const StatisticsModal: React.FC<StatisticsModalProps> = (props) => {
                 <Tabs>
                     <TabList>
                         <Tab>График</Tab>
+
+                        <Tab>Heatmap</Tab>
                     </TabList>
 
                     <TabPanel>
                         <div className="statistics-chart">
                             <h3>График средних значений</h3>
-                            
-                            {JSON.stringify(groupedStatistics, null, 2)}
+
+                            <StatisticsChart groupedStatistics={groupedStatistics} />
+                        </div>
+                    </TabPanel>
+
+                    <TabPanel>
+                        <div className="statistics-heatmap">
+                            <h3>Тепловая карта</h3>
+
+                            <Heatmap groupedStatistics={statistics.countsByDay} />
                         </div>
                     </TabPanel>
                 </Tabs>

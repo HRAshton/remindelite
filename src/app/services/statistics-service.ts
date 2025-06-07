@@ -12,19 +12,11 @@ export interface StatisticsCounts {
     date: string;
     parsedDate: Date;
 
-    balance: number;
-    thoughts: number;
-    recurringTasks: number;
-    temporaryTasks: number;
     energy: number;
     tiredness: number;
     sleepHours: number;
-    goodThings: number;
 
-    totalTasks: number;
-    totalTasksDone: number;
-    recurringTasksDone: number;
-    temporaryTasksDone: number;
+    tasksDonePercent: number;
 }
 
 export interface StatisticsData {
@@ -44,28 +36,20 @@ export class StatisticsService {
             const currentDayStats: StatisticsCounts = {
                 date: dailyData.date,
                 parsedDate: new Date(dailyData.date),
-                balance: dailyData.balance.length,
-                thoughts: dailyData.thoughts.length,
-                recurringTasks: dailyData.recurringTasks.length,
-                temporaryTasks: Object.values(dailyData.temporaryTasks).flat().length,
                 energy: dailyData.energy,
                 tiredness: dailyData.tiredness,
                 sleepHours: dailyData.sleepHours,
-                goodThings: dailyData.goodThings.length,
-                totalTasks: -1,
-                totalTasksDone: -1,
-                recurringTasksDone: -1,
-                temporaryTasksDone: -1,
+                tasksDonePercent: -1,
             };
 
             // Calculate total tasks and done tasks
-            currentDayStats.recurringTasksDone = dailyData.recurringTasks.filter(task => task.checked).length;
-            currentDayStats.temporaryTasksDone = Object.values(dailyData.temporaryTasks)
-                .flat()
+            const recurringTasksDone = dailyData.recurringTasks.filter(task => task.checked).length;
+            const allTemporaryTasks = Object.values(dailyData.temporaryTasks).flat();
+            const temporaryTasksDone = allTemporaryTasks
                 .filter(task => task.checked)
                 .length;
-            currentDayStats.totalTasks = currentDayStats.recurringTasks + currentDayStats.temporaryTasks;
-            currentDayStats.totalTasksDone = currentDayStats.recurringTasksDone + currentDayStats.temporaryTasksDone;
+            currentDayStats.tasksDonePercent = (recurringTasksDone + temporaryTasksDone)
+                / (dailyData.recurringTasks.length + allTemporaryTasks.length);
 
             countsByDay.push(currentDayStats);
         }

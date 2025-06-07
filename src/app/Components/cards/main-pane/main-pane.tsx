@@ -106,6 +106,7 @@ export const MainPane = (props: MainPaneProps) => {
                     min="0"
                     max="100"
                 />
+                <span>%</span>
 
                 <span>Усталость дня:</span>
                 <input
@@ -116,6 +117,7 @@ export const MainPane = (props: MainPaneProps) => {
                     min="0"
                     max="100"
                 />
+                <span>%</span>
 
                 <span>Часы сна:</span>
                 <input
@@ -126,13 +128,15 @@ export const MainPane = (props: MainPaneProps) => {
                     min="0"
                     max="24"
                 />
+                <span>%</span>
 
                 <span className="completed-title">
                     Выполнено:
                 </span>
                 <span className="completed-value">
-                    {completed} / 100
+                    {completed}
                 </span>
+                <span>%</span>
             </div>
 
             <div className="stats-details">

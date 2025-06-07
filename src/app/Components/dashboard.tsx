@@ -37,7 +37,7 @@ export const Dashboard = () => {
     const [selectedDate, setSelectedDate] = useState(today);
     const [historyModalData, setHistoryModalData]
         = useState<HistoryModalData | undefined>(undefined);
-    const [isStatisticsModalOpen, setIsStatisticsModalOpen] = useState(false);
+    const [isStatisticsModalOpen, setIsStatisticsModalOpen] = useState(true);
 
     const repository = useMemo(() => new Repository(new ExternalStorage()), []);
 
