@@ -33,11 +33,14 @@ export const SimpleListCard = (props: SimpleListCardProps) => {
         return item.trim() !== "";
     };
 
-    const appendItem = (item: string) => {
-        if (!isValidNewItem(item)) return;
+    const onChange = (newItems: string[]) => {
+        const validItems = newItems.filter(isValidNewItem);
+        props.onChange(validItems);
+    }
 
+    const appendItem = (item: string) => {
         const newList = [...props.items, item];
-        props.onChange(newList);
+        onChange(newList);
     };
 
     return (
@@ -55,7 +58,7 @@ export const SimpleListCard = (props: SimpleListCardProps) => {
                 <ul className="simple-list-card-items">
                     <DraggableList
                         items={props.items}
-                        onChange={props.onChange}
+                        onChange={onChange}
                         renderItem={(item, index) => (
                             <EditableLabel
                                 key={index}
@@ -63,7 +66,7 @@ export const SimpleListCard = (props: SimpleListCardProps) => {
                                 onChange={(newValue) => {
                                     const newList = [...props.items];
                                     newList[index] = newValue;
-                                    props.onChange(newList);
+                                    onChange(newList);
                                 }}
                                 renderReadOnly={(value) =>
                                     <li className="simple-list-card-item">{value}</li>
