@@ -1,4 +1,3 @@
-import './heatmap.scss';
 import { useState } from 'react';
 import type { ApexOptions } from "apexcharts";
 import ReactApexChart from "react-apexcharts";
@@ -64,7 +63,7 @@ export const Heatmap: React.FC<StatisticsChartProps> = ({ groupedStatistics }) =
 
     return (
         <>
-            <span className="statistics-heatmap-options">
+            <span className="statistics-inline">
                 <label htmlFor="parameter-select">Параметр:</label>
                 <select
                     id="parameter-select"

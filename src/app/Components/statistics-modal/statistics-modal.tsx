@@ -15,14 +15,11 @@ export interface StatisticsModalProps {
 
 export const StatisticsModal: React.FC<StatisticsModalProps> = (props) => {
     const [statistics, setStatistics] = useState<StatisticsData | null>(null);
-    const [grouping, setGrouping] = useState<Grouping>(Grouping.Day);
 
     useEffect(() => {
         const statisticsService = new StatisticsService(props.repository);
         statisticsService.getStatistics().then(setStatistics);
     }, [props.repository]);
-
-    const groupedStatistics = StatisticsService.groupBy(statistics?.countsByDay, grouping);
 
     return (
         <SimpleModal
@@ -32,21 +29,8 @@ export const StatisticsModal: React.FC<StatisticsModalProps> = (props) => {
         >
             {!statistics && <p>Загрузка статистики...</p>}
 
-            {statistics && [
-                <div className="statistics-controls" key="controls">
-                    Группировка:
-                    <select
-                        value={grouping}
-                        onChange={(e) => {
-                            setGrouping(e.target.value as Grouping);
-                        }}
-                    >
-                        <option value={Grouping.Day}>По дням</option>
-                        <option value={Grouping.Week}>По неделям</option>
-                        <option value={Grouping.Month}>По месяцам</option>
-                    </select>
-                </div>,
-                <Tabs key="tabs" className="statistics-tabs">
+            {statistics && (
+                <Tabs>
                     <TabList>
                         <Tab>График</Tab>
 
@@ -57,7 +41,7 @@ export const StatisticsModal: React.FC<StatisticsModalProps> = (props) => {
                         <div className="statistics-chart">
                             <h3>График средних значений</h3>
 
-                            <StatisticsChart groupedStatistics={groupedStatistics} />
+                            <StatisticsChart statistics={statistics.countsByDay} />
                         </div>
                     </TabPanel>
 
@@ -69,7 +53,7 @@ export const StatisticsModal: React.FC<StatisticsModalProps> = (props) => {
                         </div>
                     </TabPanel>
                 </Tabs>
-            ]}
+            )}
         </SimpleModal>
     );
 }

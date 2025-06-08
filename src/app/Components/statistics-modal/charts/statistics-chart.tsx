@@ -1,17 +1,19 @@
+import { useState } from "react";
 import type { ApexOptions } from "apexcharts";
 import ReactApexChart from "react-apexcharts";
-import { StatisticsCounts } from "../../../services/statistics-service";
-import { StatisticsParameters } from "../statistics-constants";
 import { groupBy } from "../../../helpers/list-helpers";
+import { Grouping, StatisticsCounts, StatisticsService } from "../../../services/statistics-service";
+import { StatisticsParameters } from "../statistics-constants";
 
 export interface StatisticsChartProps {
-    groupedStatistics: StatisticsCounts[];
+    statistics: StatisticsCounts[];
 }
 
-export const StatisticsChart: React.FC<StatisticsChartProps> = ({ groupedStatistics }) => {
-    const allDates = groupedStatistics
-        .map(item => item.parsedDate)
-        .sort((a, b) => a.getTime() - b.getTime());
+export const StatisticsChart: React.FC<StatisticsChartProps> = (props) => {
+    const [grouping, setGrouping] = useState<Grouping>(Grouping.Day);
+
+    const groupedStatistics = StatisticsService.groupBy(props.statistics, grouping);
+
     const options: ApexOptions = {
         chart: {
             type: 'area',
@@ -42,9 +44,26 @@ export const StatisticsChart: React.FC<StatisticsChartProps> = ({ groupedStatist
         }));
 
     return (
-        <ReactApexChart
-            options={options}
-            series={series}
-        />
+        <>
+            <span className="statistics-inline">
+                <label htmlFor="grouping-select">Группировка:</label>
+                <select
+                    id="grouping-select"
+                    value={grouping}
+                    onChange={(e) => {
+                        setGrouping(e.target.value as Grouping);
+                    }}
+                >
+                    <option value={Grouping.Day}>По дням</option>
+                    <option value={Grouping.Week}>По неделям</option>
+                    <option value={Grouping.Month}>По месяцам</option>
+                </select>
+            </span>
+
+            <ReactApexChart
+                options={options}
+                series={series}
+            />
+        </>
     );
 };
