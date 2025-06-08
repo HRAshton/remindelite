@@ -2,10 +2,13 @@ import { StatisticsCounts } from "../../services/statistics-service";
 
 export const StatisticsParameters: Record<
     keyof Omit<StatisticsCounts, 'date' | 'parsedDate'>,
-    { label: string }
+    {
+        label: string;
+        measure: string;
+    }
 > = {
-    energy: { label: 'Настроение' },
-    tiredness: { label: 'Усталость' },
-    sleepHours: { label: 'Часы сна' },
-    tasksDonePercent: { label: 'Выполнено задач' },
+    energy: { label: 'Настроение', measure: '%' },
+    tiredness: { label: 'Усталость', measure: '%' },
+    sleepHours: { label: 'Часы сна', measure: 'ч.' },
+    tasksDonePercent: { label: 'Выполнено задач', measure: '%' },
 };

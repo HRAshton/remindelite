@@ -128,7 +128,7 @@ export const MainPane = (props: MainPaneProps) => {
                     min="0"
                     max="24"
                 />
-                <span>%</span>
+                <span>ч.</span>
 
                 <span className="completed-title">
                     Выполнено:

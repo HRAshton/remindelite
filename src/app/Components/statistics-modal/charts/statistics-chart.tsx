@@ -2,29 +2,31 @@ import type { ApexOptions } from "apexcharts";
 import ReactApexChart from "react-apexcharts";
 import { StatisticsCounts } from "../../../services/statistics-service";
 import { StatisticsParameters } from "../statistics-constants";
+import { groupBy } from "../../../helpers/list-helpers";
 
 export interface StatisticsChartProps {
     groupedStatistics: StatisticsCounts[];
 }
 
 export const StatisticsChart: React.FC<StatisticsChartProps> = ({ groupedStatistics }) => {
+    const allDates = groupedStatistics
+        .map(item => item.parsedDate)
+        .sort((a, b) => a.getTime() - b.getTime());
     const options: ApexOptions = {
         chart: {
             type: 'area',
         },
         xaxis: {
             type: 'datetime',
-            categories: groupedStatistics
-                .map(item => item.parsedDate.getTime()),
         },
-        yaxis: {
-            seriesName: Object
-                .values(StatisticsParameters)
-                .map(param => param.label),
+        yaxis: Object.entries(groupBy(Object.values(StatisticsParameters),
+            ({ measure }) => measure,
+        )).map(([measure, params]) => ({
+            seriesName: params.map(param => param.label),
             labels: {
-                formatter: (val) => `${Math.round(val)}%`,
+                formatter: (val: number) => `${Math.round(val)} ${measure}`,
             },
-        },
+        })),
         stroke: {
             curve: 'smooth',
         },
@@ -33,7 +35,10 @@ export const StatisticsChart: React.FC<StatisticsChartProps> = ({ groupedStatist
     const series: ApexAxisChartSeries = Object.keys(StatisticsParameters)
         .map((param: keyof typeof StatisticsParameters) => ({
             name: StatisticsParameters[param].label,
-            data: groupedStatistics.map(item => item[param]),
+            data: groupedStatistics.map(item => ({
+                x: item.parsedDate.getTime(),
+                y: item[param]
+            })),
         }));
 
     return (

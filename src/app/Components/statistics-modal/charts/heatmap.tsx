@@ -4,6 +4,7 @@ import type { ApexOptions } from "apexcharts";
 import ReactApexChart from "react-apexcharts";
 import { StatisticsCounts } from "../../../services/statistics-service";
 import { StatisticsParameters } from '../statistics-constants';
+import { groupBy } from '../../../helpers/list-helpers';
 
 export interface StatisticsChartProps {
     groupedStatistics: StatisticsCounts[];
@@ -42,20 +43,23 @@ export const Heatmap: React.FC<StatisticsChartProps> = ({ groupedStatistics }) =
         },
     }
 
-    // Generates month names in Russian
-    const series: ApexAxisChartSeries = Array.from({ length: 12 })
-        .map((_, i) => new Date(2000, i, 1))
-        .map(date => new Intl.DateTimeFormat('ru', { month: 'long' }).format(date))
-        .map((month, monthIndex) => ({
-            name: month,
-            data: groupedStatistics
-                .map(item => {
-                    const date = new Date(item.parsedDate);
-                    return date.getMonth() === monthIndex
-                        ? { x: date.getDate(), y: Math.round(item[parameter]) }
-                        : null;
-                })
-                .filter(item => item !== null) as { x: number, y: number }[]
+    const currentYear = new Date().getFullYear();
+    const allDatesInYear = Array.from(
+        { length: 366 },
+        (_, i) => new Date(currentYear, 0, i + 1),
+    ).filter(date => date.getFullYear() === currentYear);
+
+    const series: ApexAxisChartSeries = Object.values(groupBy(allDatesInYear, (date) => date.getMonth()))
+        .map((group) => ({
+            name: group[0].toLocaleString('ru', { month: 'long' }),
+            data: group.map(date => {
+                const dateString = date.toISOString().split('T')[0];
+                const stat = groupedStatistics.find(item => item.parsedDate.toISOString().split('T')[0] === dateString);
+                return {
+                    x: dateString,
+                    y: stat ? stat[parameter] : '',
+                };
+            })
         }));
 
     return (

@@ -33,7 +33,7 @@ export const StatisticsModal: React.FC<StatisticsModalProps> = (props) => {
             {!statistics && <p>Загрузка статистики...</p>}
 
             {statistics && [
-                <div>
+                <div className="statistics-controls" key="controls">
                     Группировка:
                     <select
                         value={grouping}
@@ -46,7 +46,7 @@ export const StatisticsModal: React.FC<StatisticsModalProps> = (props) => {
                         <option value={Grouping.Month}>По месяцам</option>
                     </select>
                 </div>,
-                <Tabs>
+                <Tabs key="tabs" className="statistics-tabs">
                     <TabList>
                         <Tab>График</Tab>
 
