@@ -27,9 +27,14 @@ export const PastableImage = (props: PastableImageProps) => {
         reader.readAsDataURL(blob);
     }
 
+    const onClearClick = (event: React.MouseEvent<HTMLImageElement>) => {
+        event.stopPropagation();
+        props.onChange('');
+    }
+
     return (
         <div className={`pastable-image ${props.className}`}>
-            {props.image && (
+            {props.image && [
                 <img
                     src={props.image}
                     alt="Pastable"
@@ -37,18 +42,30 @@ export const PastableImage = (props: PastableImageProps) => {
                     onClick={() => {
                         navigator.clipboard.writeText(props.image);
                     }}
-                />
-            )}
+                />,
 
-            <div
-                className="pastable-image-overlay"
-                title="Вставить из буфера обмена"
-                onClick={onPasteClick}
-            >
-                <span className="pastable-image-overlay-text">
-                    Вставить из буфера обмена
-                </span>
-            </div>
+                <div className="pastable-image-overlay"
+                    onClick={onClearClick}>
+                    <span className="pastable-image-overlay-text">
+                        Очистить изображение
+                    </span>
+                </div>
+            ]}
+
+            {!props.image && [
+                <div className="pastable-image-placeholder">
+                    <span>Нет изображения</span>
+                </div>,
+
+                <div
+                    className="pastable-image-overlay"
+                    onClick={onPasteClick}
+                >
+                    <span className="pastable-image-overlay-text">
+                        Вставить из буфера обмена
+                    </span>
+                </div>
+            ]}
         </div>
     );
 };

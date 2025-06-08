@@ -4,41 +4,45 @@ import { BaseCard } from "../base-card/base-card";
 import { DraggableList } from "../../shared/draggable-list/draggable-list";
 import { EditableLabel } from "../../shared/editable-label/editable-label";
 
-export interface SimpleListCardProps {
-    items: string[];
-    onChange: (newItems: string[]) => void;
+export interface SimpleListCardProps<T> {
+    items: T[];
+    onChange: (newItems: T[]) => void;
     title: string;
     className?: string;
     onTitleClick?: () => void;
+
+    getItemText: (item: T) => string;
+    setItemText: (item: T, text: string) => T;
+    createNewItem: (text: string) => T;
 }
 
-export const SimpleListCard = (props: SimpleListCardProps) => {
+export const SimpleListCard = <T extends unknown>(props: SimpleListCardProps<T>) => {
     const renderNewItem = (
-        item: string,
-        onChange: (updatedItem: string) => void,
+        item: T,
+        onChange: (updatedItem: T) => void,
         onBlur: () => void,
     ) => {
         return (
             <input
                 type="text"
-                value={item}
-                onChange={(e) => onChange(e.target.value)}
+                value={props.getItemText(item)}
+                onChange={(e) => onChange(props.setItemText(item, e.target.value))}
                 onBlur={onBlur}
                 autoFocus
             />
         )
     };
 
-    const isValidNewItem = (item: string) => {
-        return item.trim() !== "";
+    const isValidNewItem = (item: T) => {
+        return props.getItemText(item).trim() !== "";
     };
 
-    const onChange = (newItems: string[]) => {
+    const onChange = (newItems: T[]) => {
         const validItems = newItems.filter(isValidNewItem);
         props.onChange(validItems);
     }
 
-    const appendItem = (item: string) => {
+    const appendItem = (item: T) => {
         const newList = [...props.items, item];
         onChange(newList);
     };
@@ -49,8 +53,8 @@ export const SimpleListCard = (props: SimpleListCardProps) => {
             header={<h2>{props.title}</h2>}
             onHeaderClick={props.onTitleClick}
         >
-            <AppendableList
-                newItemFactory={() => ""}
+            <AppendableList<T>
+                newItemFactory={() => props.createNewItem("")}
                 renderNewItem={renderNewItem}
                 isNewItemValid={isValidNewItem}
                 appendItem={appendItem}
@@ -69,13 +73,15 @@ export const SimpleListCard = (props: SimpleListCardProps) => {
                                     onChange(newList);
                                 }}
                                 renderReadOnly={(value) =>
-                                    <li className="simple-list-card-item">{value}</li>
+                                    <li className="simple-list-card-item">
+                                        {props.getItemText(item)}
+                                    </li>
                                 }
                                 renderEditing={(value, onChange, onBlur) => (
                                     <input
                                         type="text"
-                                        value={value}
-                                        onChange={(e) => onChange(e.target.value)}
+                                        value={props.getItemText(item)}
+                                        onChange={(e) => onChange(props.setItemText(item, e.target.value))}
                                         onBlur={onBlur}
                                         autoFocus
                                     />
@@ -88,3 +94,15 @@ export const SimpleListCard = (props: SimpleListCardProps) => {
         </BaseCard>
     );
 };
+
+export const SimpleTextListCard = (
+    props: Omit<
+        SimpleListCardProps<string>,
+        'createNewItem' | 'setItemText' | 'getItemText'>,
+) => (
+    <SimpleListCard<string>
+        {...props}
+        createNewItem={(text) => text}
+        setItemText={(_, text) => text}
+        getItemText={(item) => item} />
+);

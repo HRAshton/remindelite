@@ -1,6 +1,6 @@
 export interface FoodData {
     comment: string;
-    image: string;
+    image: string | '';
 }
 
 export interface CheckableItem {
@@ -21,7 +21,7 @@ export interface DailyStoredData {
     sleepHours: number;
 
     goodThings: string[];
-    food: FoodData;
+    food: FoodData[];
 }
 
 export interface PersistentData {

@@ -3,11 +3,12 @@ import { useEffect, useMemo, useState } from 'react';
 import type { CheckableItem } from '../../common/entries';
 import { Repository } from '../../common/repository';
 import { MainPane } from './cards/main-pane/main-pane';
-import { SimpleListCard } from './cards/simple-list-card/simple-list-card';
+import { SimpleTextListCard } from './cards/simple-list-card/simple-list-card';
 import { FoodCard } from './cards/food-card/food-card';
 import { HistoryModal } from './history-modal/history-modal';
 import { StatisticsModal } from './statistics-modal/statistics-modal';
 import { ExternalStorage } from '../services/database/external-storage';
+import { FoodModal } from './food-modal/food-modal';
 
 type HistoryModalData = {
     title: string;
@@ -37,7 +38,8 @@ export const Dashboard = () => {
     const [selectedDate, setSelectedDate] = useState(today);
     const [historyModalData, setHistoryModalData]
         = useState<HistoryModalData | undefined>(undefined);
-    const [isStatisticsModalOpen, setIsStatisticsModalOpen] = useState(true);
+    const [isStatisticsModalOpen, setIsStatisticsModalOpen] = useState(false);
+    const [isFoodModalOpen, setIsFoodModalOpen] = useState(false);
 
     const repository = useMemo(() => new Repository(new ExternalStorage()), []);
 
@@ -93,10 +95,10 @@ export const Dashboard = () => {
 
     return (
         <div className="dashboard">
-            <SimpleListCard {...getPersistentSimpleListProps('debts')} title="Долги" />
-            <SimpleListCard {...getPersistentSimpleListProps('remember')} title="Не забыть" />
-            <SimpleListCard {...getDailySimpleListProps('balance', "Доходы/расходы")} />
-            <SimpleListCard {...getDailySimpleListProps('thoughts', "Мысли")} />
+            <SimpleTextListCard {...getPersistentSimpleListProps('debts')} title="Долги" />
+            <SimpleTextListCard {...getPersistentSimpleListProps('remember')} title="Не забыть" />
+            <SimpleTextListCard {...getDailySimpleListProps('balance', "Доходы/расходы")} />
+            <SimpleTextListCard {...getDailySimpleListProps('thoughts', "Мысли")} />
 
             <MainPane
                 className="main-pane"
@@ -125,27 +127,41 @@ export const Dashboard = () => {
                 }}
             />
 
-            <SimpleListCard {...getPersistentSimpleListProps('globalPlans')} title="Глобальные планы" />
-            <SimpleListCard {...getPersistentSimpleListProps('nearPlans')} title="Ближайшие планы" />
-            <SimpleListCard {...getDailySimpleListProps('goodThings', "Хорошее за день")} />
+            <SimpleTextListCard {...getPersistentSimpleListProps('globalPlans')} title="Глобальные планы" />
+            <SimpleTextListCard {...getPersistentSimpleListProps('nearPlans')} title="Ближайшие планы" />
+            <SimpleTextListCard {...getDailySimpleListProps('goodThings', "Хорошее за день")} />
             <FoodCard
                 className="food"
                 data={dailyData.food}
+                onTitleClick={() => setIsFoodModalOpen(true)}
                 onChange={(newFood) => {
                     onDailyDataChange({ ...dailyData, food: newFood });
-                }} />
-
-
-            <HistoryModal
-                title={historyModalData?.title}
-                historyEntries={historyModalData?.historyEntries}
-                onClose={() => setHistoryModalData(undefined)}
+                }}
             />
+
+
+            {historyModalData && (
+                <HistoryModal
+                    title={historyModalData.title}
+                    historyEntries={historyModalData?.historyEntries}
+                    onClose={() => setHistoryModalData(undefined)}
+                />
+            )}
 
             {isStatisticsModalOpen && (
                 <StatisticsModal
                     repository={repository}
                     onClose={() => setIsStatisticsModalOpen(false)}
+                />
+            )}
+
+            {isFoodModalOpen && (
+                <FoodModal
+                    foodData={dailyData.food}
+                    onFoodDataChange={(food) => {
+                        onDailyDataChange({ ...dailyData, food });
+                    }}
+                    onClose={() => setIsFoodModalOpen(false)}
                 />
             )}
         </div>

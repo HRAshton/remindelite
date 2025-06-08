@@ -53,10 +53,7 @@ export class Repository {
             sleepHours: 0,
 
             goodThings: [],
-            food: {
-                comment: '',
-                image: '',
-            },
+            food: [],
         };
     }
 
