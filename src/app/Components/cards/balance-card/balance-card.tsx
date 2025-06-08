@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { parseBalance } from '../../../helpers/parsing-helpers';
 import { SimpleTextListCard } from '../simple-list-card/simple-list-card';
 
 export interface BalanceCardProps {
@@ -12,14 +13,13 @@ export const BalanceCard = (props: BalanceCardProps) => {
         let incomes = 0;
         let expenses = 0;
         props.data.forEach(item => {
-            const parts = item.split(' ', 2);
-            const amount = parseFloat(parts[0]);
-            if (isFinite(amount)) {
-                if (amount > 0) {
-                    incomes += amount;
-                } else {
-                    expenses += Math.abs(amount);
-                }
+            const balance = parseBalance(item);
+            if (!balance) return;
+
+            if (balance[0] > 0) {
+                incomes += balance[0];
+            } else {
+                expenses += Math.abs(balance[0]);
             }
         });
         const sum = incomes - expenses;
@@ -32,13 +32,7 @@ export const BalanceCard = (props: BalanceCardProps) => {
             onChange={props.onChange}
             className={props.className}
             title="Доходы/Расходы"
-            isValidNewItem={(item) => {
-                const parts = item.split(' ', 2);
-                const amount = parseFloat(parts[0]);
-                if (!isFinite(amount)) return false;
-
-                return true;
-            }}
+            isValidNewItem={(item) => !!parseBalance(item)}
             footer={
                 <div className="balance-card-footer">
                     <span>{totalCounts.incomes.toFixed(2)}</span>

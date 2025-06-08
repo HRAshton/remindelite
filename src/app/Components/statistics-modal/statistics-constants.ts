@@ -11,4 +11,7 @@ export const StatisticsParameters: Record<
     tiredness: { label: 'Усталость', measure: '%' },
     sleepHours: { label: 'Часы сна', measure: 'ч.' },
     tasksDonePercent: { label: 'Выполнено задач', measure: '%' },
+    income: { label: 'Доходы', measure: 'руб.' },
+    expenses: { label: 'Расходы', measure: 'руб.' },
+    balance: { label: 'Баланс', measure: 'руб.' },
 };

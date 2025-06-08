@@ -45,7 +45,7 @@ export class Repository {
         // If no data exists, create a new MonthlyStoredData object
         return {
             date,
-            balance: [],
+            balances: [],
         };
     }
 
@@ -139,7 +139,16 @@ export class Repository {
         }
     }
 
-    public async getAllForStatistics(): Promise<DailyStoredData[]> {
+    public async getAllMonthlyForStatistics(): Promise<MonthlyStoredData[]> {
+        const allItems = await this.externalStorage.getAllData();
+        const monthlyData = Object.keys(allItems)
+            .filter(key => key.startsWith(`monthly:`))
+            .map(key => JSON.parse(allItems[key]));
+
+        return monthlyData;
+    }
+
+    public async getAllDailyForStatistics(): Promise<DailyStoredData[]> {
         const allItems = await this.externalStorage.getAllData();
         const dailyData = Object.keys(allItems)
             .filter(key => key.startsWith(`daily:`))

@@ -25,7 +25,7 @@ export interface DailyStoredData {
 
 export interface MonthlyStoredData {
     date: string;
-    balance: string[];
+    balances: string[];
 }
 
 export interface PersistentData {

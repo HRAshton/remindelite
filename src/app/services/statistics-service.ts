@@ -1,5 +1,6 @@
 import { getWeek } from "../helpers/date-helpers";
-import { groupBy, avgOf } from "../helpers/list-helpers";
+import { groupBy, avgOf, sumOf } from "../helpers/list-helpers";
+import { parseBalance } from "../helpers/parsing-helpers";
 import { Repository } from "../../common/repository";
 
 export enum Grouping {
@@ -17,6 +18,10 @@ export interface StatisticsCounts {
     sleepHours: number;
 
     tasksDonePercent: number;
+
+    income?: number;
+    expenses?: number;
+    balance?: number;
 }
 
 export interface StatisticsData {
@@ -28,11 +33,16 @@ export class StatisticsService {
     }
 
     public async getStatistics(): Promise<StatisticsData> {
-        const allData = await this.repository.getAllForStatistics();
-        const sortedData = allData.sort((a, b) => a.date.localeCompare(b.date));
+        const dailyData = await this.repository.getAllDailyForStatistics();
+        const sortedDailyData = dailyData.sort((a, b) => a.date.localeCompare(b.date));
+
+        const monthlyData = await this.getBalanceStatistics();
 
         const countsByDay: StatisticsCounts[] = [];
-        for (const dailyData of sortedData) {
+        for (const dailyData of sortedDailyData) {
+            const selectedMonthlyData = monthlyData
+                .find(item => dailyData.date.startsWith(item.date));
+
             const currentDayStats: StatisticsCounts = {
                 date: dailyData.date,
                 parsedDate: new Date(dailyData.date),
@@ -41,6 +51,12 @@ export class StatisticsService {
                 sleepHours: dailyData.sleepHours,
                 tasksDonePercent: -1,
             };
+
+            if (selectedMonthlyData) {
+                currentDayStats.income = selectedMonthlyData.income;
+                currentDayStats.expenses = selectedMonthlyData.expenses;
+                currentDayStats.balance = selectedMonthlyData.balance;
+            }
 
             // Calculate total tasks and done tasks
             const recurringTasksDone = dailyData.recurringTasks.filter(task => task.checked).length;
@@ -97,5 +113,25 @@ export class StatisticsService {
         }
 
         return result;
+    }
+
+    private async getBalanceStatistics(): Promise<Pick<
+        StatisticsCounts,
+        'date' | 'income' | 'expenses' | 'balance'
+    >[]> {
+        const monthlyData = await this.repository.getAllMonthlyForStatistics();
+        return monthlyData.map(item => {
+            const balances = item.balances.map(parseBalance);
+
+            const income = sumOf(balances, balance => balance[0] > 0 ? balance[0] : 0);
+            const expenses = sumOf(balances, balance => balance[0] < 0 ? -balance[0] : 0);
+
+            return ({
+                date: item.date,
+                income,
+                expenses,
+                balance: income - expenses,
+            });
+        });
     }
 }

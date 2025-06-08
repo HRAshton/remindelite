@@ -26,3 +26,11 @@ export const avgOf = <T>(list: T[], keyFn: (item: T) => number): number => {
     const total = list.reduce((sum, item) => sum + keyFn(item), 0);
     return total / list.length;
 }
+
+/**
+ * Calculates the sum of all elements in the array.
+ * @returns The sum of all elements in the array
+ */
+export const sumOf = <T>(list: T[], keyFn: (item: T) => number): number => {
+    return list.reduce((sum, item) => sum + keyFn(item), 0);
+}

@@ -111,9 +111,9 @@ export const Dashboard = () => {
             <SimpleTextListCard {...getPersistentSimpleListProps('remember')} title="Не забыть" />
             <BalanceCard
                 className="balance"
-                data={monthlyData.balance}
+                data={monthlyData.balances}
                 onChange={(newData) => {
-                    onMonthlyDataChange({ balance: newData });
+                    onMonthlyDataChange({ balances: newData });
                 }}
             />
             <SimpleTextListCard {...getDailySimpleListProps('thoughts', "Мысли")} />
