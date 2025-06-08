@@ -11,7 +11,6 @@ export interface CheckableItem {
 export interface DailyStoredData {
     date: string;
 
-    balance: string[];
     thoughts: string[];
 
     recurringTasks: CheckableItem[];
@@ -22,6 +21,11 @@ export interface DailyStoredData {
 
     goodThings: string[];
     food: FoodData[];
+}
+
+export interface MonthlyStoredData {
+    date: string;
+    balance: string[];
 }
 
 export interface PersistentData {

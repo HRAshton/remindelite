@@ -1,4 +1,3 @@
-import './food-card.scss';
 import { FoodData } from "../../../../common/entries";
 import { SimpleListCard } from '../simple-list-card/simple-list-card';
 
@@ -19,7 +18,8 @@ export const FoodCard = (props: FoodCardProps) => {
             onTitleClick={props.onTitleClick}
             getItemText={(item) => item.comment}
             setItemText={(item, text) => ({ ...item, comment: text })}
-            createNewItem={(text) => ({ comment: text, image: '' })}
+            createNewItem={() => ({ comment: '', image: '' })}
+            isValidNewItem={(item) => item.comment.trim() !== ''}
         />
     );
 }

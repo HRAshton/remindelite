@@ -1,4 +1,4 @@
-import type { DailyStoredData, PersistentData } from "./entries";
+import type { DailyStoredData, MonthlyStoredData, PersistentData } from "./entries";
 
 interface ExternalStorage {
     getData(key: string): Promise<string | null>;
@@ -33,6 +33,36 @@ export class Repository {
         }
     }
 
+    public async getOrCreateMonthlyData(date: string): Promise<MonthlyStoredData> {
+        if (date.length !== 7) {
+            throw new Error("Invalid date format for monthly data. Expected format: YYYY-MM");
+        }
+        const rawData = await this.externalStorage.getData(`monthly:${date}`);
+        if (rawData) {
+            return JSON.parse(rawData) as MonthlyStoredData;
+        }
+
+        // If no data exists, create a new MonthlyStoredData object
+        return {
+            date,
+            balance: [],
+        };
+    }
+
+    public async saveMonthlyData(date: string, data: MonthlyStoredData): Promise<void> {
+        try {
+            if (date !== data.date || date.length !== 7) {
+                throw new Error("Invalid date format for monthly data. Expected format: YYYY-MM");
+            }
+
+            this.externalStorage.setData(`monthly:${date}`, JSON.stringify(data));
+        } catch (error) {
+            console.error("Error saving monthly data to externalStorage:", error);
+            alert("Не удалось сохранить данные в локальное хранилище");
+            throw new Error("Failed to save monthly data");
+        }
+    }
+
     public async getDailyData(date: string): Promise<DailyStoredData | null> {
         const rawData = await this.externalStorage.getData(`daily:${date}`);
         return rawData ? JSON.parse(rawData) as DailyStoredData : null;
@@ -43,7 +73,6 @@ export class Repository {
         return existingData ?? {
             date,
 
-            balance: [],
             thoughts: [],
 
             recurringTasks: await this.getLastRecurringTasks() || [],
@@ -59,6 +88,9 @@ export class Repository {
 
     public async saveDailyData(date: string, data: DailyStoredData): Promise<void> {
         try {
+            if (date !== data.date || date.length !== 10) {
+                throw new Error("Invalid date format for daily data. Expected format: YYYY-MM-DD");
+            }
             this.externalStorage.setData(`daily:${date}`, JSON.stringify(data));
             this.saveLastRecurringTasks(data.recurringTasks);
         } catch (error) {

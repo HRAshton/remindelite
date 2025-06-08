@@ -13,7 +13,8 @@ export interface SimpleListCardProps<T> {
 
     getItemText: (item: T) => string;
     setItemText: (item: T, text: string) => T;
-    createNewItem: (text: string) => T;
+    createNewItem: () => T;
+    isValidNewItem: (item: T) => boolean;
 }
 
 export const SimpleListCard = <T extends unknown>(props: SimpleListCardProps<T>) => {
@@ -25,6 +26,7 @@ export const SimpleListCard = <T extends unknown>(props: SimpleListCardProps<T>)
         return (
             <input
                 type="text"
+                className={`simple-list-card-new-item-input ${props.isValidNewItem(item) ? '' : 'invalid'}`}
                 value={props.getItemText(item)}
                 onChange={(e) => onChange(props.setItemText(item, e.target.value))}
                 onBlur={onBlur}
@@ -33,12 +35,8 @@ export const SimpleListCard = <T extends unknown>(props: SimpleListCardProps<T>)
         )
     };
 
-    const isValidNewItem = (item: T) => {
-        return props.getItemText(item).trim() !== "";
-    };
-
     const onChange = (newItems: T[]) => {
-        const validItems = newItems.filter(isValidNewItem);
+        const validItems = newItems.filter(props.isValidNewItem);
         props.onChange(validItems);
     }
 
@@ -54,9 +52,9 @@ export const SimpleListCard = <T extends unknown>(props: SimpleListCardProps<T>)
             onHeaderClick={props.onTitleClick}
         >
             <AppendableList<T>
-                newItemFactory={() => props.createNewItem("")}
+                newItemFactory={props.createNewItem}
                 renderNewItem={renderNewItem}
-                isNewItemValid={isValidNewItem}
+                isNewItemValid={props.isValidNewItem}
                 appendItem={appendItem}
             >
                 <ul className="simple-list-card-items">
@@ -77,15 +75,7 @@ export const SimpleListCard = <T extends unknown>(props: SimpleListCardProps<T>)
                                         {props.getItemText(item)}
                                     </li>
                                 }
-                                renderEditing={(value, onChange, onBlur) => (
-                                    <input
-                                        type="text"
-                                        value={props.getItemText(item)}
-                                        onChange={(e) => onChange(props.setItemText(item, e.target.value))}
-                                        onBlur={onBlur}
-                                        autoFocus
-                                    />
-                                )}
+                                renderEditing={renderNewItem}
                             />
                         )}
                     />
@@ -98,11 +88,17 @@ export const SimpleListCard = <T extends unknown>(props: SimpleListCardProps<T>)
 export const SimpleTextListCard = (
     props: Omit<
         SimpleListCardProps<string>,
-        'createNewItem' | 'setItemText' | 'getItemText'>,
+        'createNewItem' | 'setItemText' | 'getItemText' | 'isValidNewItem'
+    > & {
+        isValidNewItem?: (item: string) => boolean;
+    }
 ) => (
     <SimpleListCard<string>
-        {...props}
-        createNewItem={(text) => text}
+        createNewItem={() => ""}
         setItemText={(_, text) => text}
-        getItemText={(item) => item} />
+        getItemText={(item) => item}
+        isValidNewItem={(item) => item.trim() !== ""}
+
+        {...props}
+    />
 );

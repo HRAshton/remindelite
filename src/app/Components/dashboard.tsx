@@ -9,6 +9,7 @@ import { HistoryModal } from './history-modal/history-modal';
 import { StatisticsModal } from './statistics-modal/statistics-modal';
 import { ExternalStorage } from '../services/database/external-storage';
 import { FoodModal } from './food-modal/food-modal';
+import { BalanceCard } from './cards/balance-card/balance-card';
 
 type HistoryModalData = {
     title: string;
@@ -47,11 +48,15 @@ export const Dashboard = () => {
         () => repository.getPersistentData(),
         [version]);
 
+    const monthlyData = useMemoAsync(
+        () => repository.getOrCreateMonthlyData(selectedDate.slice(0, 7)),
+        [selectedDate, version]);
+
     const dailyData = useMemoAsync(
         () => repository.getOrCreateDailyData(selectedDate),
         [selectedDate, version]);
 
-    if (!persistentData || !dailyData) {
+    if (!persistentData || !dailyData || !monthlyData) {
         return <div className="loading">Загрузка...</div>;
     }
 
@@ -59,8 +64,15 @@ export const Dashboard = () => {
         setVersion(prev => prev + 1);
     }
 
-    const updatePersistentData = async (newData: Partial<typeof persistentData>) => {
+    const onPersistentDataChange = async (newData: Partial<typeof persistentData>) => {
         await repository.savePersistentData({ ...persistentData, ...newData });
+        incrementVersion();
+    }
+
+    const onMonthlyDataChange = (newData: Partial<typeof monthlyData>) => {
+        const date = selectedDate.slice(0, 7); // YYYY-MM format
+        const updatedData = { ...monthlyData, ...newData };
+        repository.saveMonthlyData(date, updatedData);
         incrementVersion();
     }
 
@@ -73,7 +85,7 @@ export const Dashboard = () => {
     const getPersistentSimpleListProps = (key: keyof typeof persistentData) => ({
         items: persistentData[key] as string[],
         onChange: (newItems: string[]) => {
-            updatePersistentData({ [key]: newItems });
+            onPersistentDataChange({ [key]: newItems });
         },
         className: key,
     });
@@ -88,7 +100,7 @@ export const Dashboard = () => {
         title,
         items: dailyData[key] as string[],
         onChange: (newItems: string[]) =>
-            onDailyDataChange({ ...dailyData, [key]: newItems }),
+            onDailyDataChange({ [key]: newItems }),
         className: key,
         onTitleClick: () => showHistory(key, title),
     });
@@ -97,7 +109,14 @@ export const Dashboard = () => {
         <div className="dashboard">
             <SimpleTextListCard {...getPersistentSimpleListProps('debts')} title="Долги" />
             <SimpleTextListCard {...getPersistentSimpleListProps('remember')} title="Не забыть" />
-            <SimpleTextListCard {...getDailySimpleListProps('balance', "Доходы/расходы")} />
+            <BalanceCard
+                className="balance"
+                data={monthlyData.balance}
+                onTitleClick={() => { }}
+                onChange={(newData) => {
+                    onMonthlyDataChange({ balance: newData });
+                }}
+            />
             <SimpleTextListCard {...getDailySimpleListProps('thoughts', "Мысли")} />
 
             <MainPane
@@ -107,23 +126,23 @@ export const Dashboard = () => {
                 onDateChange={setSelectedDate}
                 recurringTasks={dailyData.recurringTasks}
                 onRecurringTasksChange={(newTasks: CheckableItem[]) => {
-                    onDailyDataChange({ ...dailyData, recurringTasks: newTasks });
+                    onDailyDataChange({ recurringTasks: newTasks });
                 }}
                 temporaryTasks={dailyData.temporaryTasks}
                 onTemporaryTasksChange={(newTasks: Record<string, CheckableItem[]>) => {
-                    onDailyDataChange({ ...dailyData, temporaryTasks: newTasks });
+                    onDailyDataChange({ temporaryTasks: newTasks });
                 }}
                 energy={dailyData.energy}
                 onEnergyChange={(newEnergy: number) => {
-                    onDailyDataChange({ ...dailyData, energy: newEnergy });
+                    onDailyDataChange({ energy: newEnergy });
                 }}
                 tiredness={dailyData.tiredness}
                 onTirednessChange={(newTiredness: number) => {
-                    onDailyDataChange({ ...dailyData, tiredness: newTiredness });
+                    onDailyDataChange({ tiredness: newTiredness });
                 }}
                 sleepHours={dailyData.sleepHours}
                 onSleepHoursChange={(newSleepHours: number) => {
-                    onDailyDataChange({ ...dailyData, sleepHours: newSleepHours });
+                    onDailyDataChange({ sleepHours: newSleepHours });
                 }}
             />
 
@@ -135,7 +154,7 @@ export const Dashboard = () => {
                 data={dailyData.food}
                 onTitleClick={() => setIsFoodModalOpen(true)}
                 onChange={(newFood) => {
-                    onDailyDataChange({ ...dailyData, food: newFood });
+                    onDailyDataChange({ food: newFood });
                 }}
             />
 
@@ -159,7 +178,7 @@ export const Dashboard = () => {
                 <FoodModal
                     foodData={dailyData.food}
                     onFoodDataChange={(food) => {
-                        onDailyDataChange({ ...dailyData, food });
+                        onDailyDataChange({ food });
                     }}
                     onClose={() => setIsFoodModalOpen(false)}
                 />
