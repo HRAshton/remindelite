@@ -5,6 +5,7 @@ export interface BaseCardProps {
     children: React.ReactNode;
     className?: string;
     onHeaderClick?: () => void;
+    footer?: React.ReactNode;
 }
 
 export const BaseCard = (props: BaseCardProps) => {
@@ -20,6 +21,11 @@ export const BaseCard = (props: BaseCardProps) => {
             <div className="card-content">
                 {props.children}
             </div>
+            {props.footer && (
+                <div className="card-footer">
+                    {props.footer}
+                </div>
+            )}
         </div>
     );
 };

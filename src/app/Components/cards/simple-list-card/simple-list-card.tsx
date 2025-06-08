@@ -15,6 +15,8 @@ export interface SimpleListCardProps<T> {
     setItemText: (item: T, text: string) => T;
     createNewItem: () => T;
     isValidNewItem: (item: T) => boolean;
+
+    footer?: React.ReactNode;
 }
 
 export const SimpleListCard = <T extends unknown>(props: SimpleListCardProps<T>) => {
@@ -50,6 +52,7 @@ export const SimpleListCard = <T extends unknown>(props: SimpleListCardProps<T>)
             className={`simple-list-card ${props.className || ""}`}
             header={<h2>{props.title}</h2>}
             onHeaderClick={props.onTitleClick}
+            footer={props.footer}
         >
             <AppendableList<T>
                 newItemFactory={props.createNewItem}

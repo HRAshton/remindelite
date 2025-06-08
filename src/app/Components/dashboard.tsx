@@ -112,7 +112,6 @@ export const Dashboard = () => {
             <BalanceCard
                 className="balance"
                 data={monthlyData.balance}
-                onTitleClick={() => { }}
                 onChange={(newData) => {
                     onMonthlyDataChange({ balance: newData });
                 }}
