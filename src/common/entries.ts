@@ -1,3 +1,5 @@
+export const COMPATIBILITY_VERSION = 2;
+
 export interface FoodData {
     comment: string;
     image: string | '';
