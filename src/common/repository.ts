@@ -189,7 +189,13 @@ export class Repository {
 
     public async saveLastDailyTasks(temporaryTasks: DailyStoredData["temporaryTasks"]): Promise<void> {
         try {
-            await this.externalStorage.setData(`last-daily-tasks`, JSON.stringify(temporaryTasks));
+            const tasks: DailyStoredData["temporaryTasks"] = JSON.parse(JSON.stringify(temporaryTasks));
+            Object.values(tasks).forEach(categoryTasks => {
+                categoryTasks.forEach(task => {
+                    task.checked = false; // Reset checked state
+                });
+            });
+            await this.externalStorage.setData(`last-daily-tasks`, JSON.stringify(tasks));
         } catch (error) {
             console.error("Error saving last daily tasks to externalStorage:", error);
             alert("Не удалось сохранить последние временные задачи в локальное хранилище");
