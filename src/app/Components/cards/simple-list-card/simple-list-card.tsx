@@ -26,14 +26,21 @@ export const SimpleListCard = <T extends unknown>(props: SimpleListCardProps<T>)
         onBlur: () => void,
     ) => {
         return (
-            <input
-                type="text"
-                className={`simple-list-card-new-item-input ${props.isValidNewItem(item) ? '' : 'invalid'}`}
-                value={props.getItemText(item)}
-                onChange={(e) => onChange(props.setItemText(item, e.target.value))}
-                onBlur={onBlur}
-                autoFocus
-            />
+            <div className="simple-list-card-input-wrapper">
+                <input
+                    type="text"
+                    className={'simple-list-card-new-item-input'}
+                    value={props.getItemText(item)}
+                    onChange={(e) => onChange(props.setItemText(item, e.target.value))}
+                    onBlur={onBlur}
+                    autoFocus
+                />
+                {!props.isValidNewItem(item) && (
+                    <span className="error-icon" title="Invalid item">
+                        &#9888; {/* Warning icon */}
+                    </span>
+                )}
+            </div>
         )
     };
 

@@ -16,6 +16,22 @@
         left: -1em;
     }
 
+    .simple-list-card-input-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+
+    .error-icon {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        /* icon won't block input clicks */
+        font-size: 16px;
+        color: red;
+    }
+
     .simple-list-card-new-item-input.invalid {
         background-color: orangered;
     }
