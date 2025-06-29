@@ -76,7 +76,7 @@ export class Repository {
             thoughts: [],
 
             recurringTasks: await this.getLastRecurringTasks() || [],
-            temporaryTasks: {},
+            temporaryTasks: await this.getLastDailyTasks() || {},
             energy: 0,
             tiredness: 0,
             sleepHours: 0,
@@ -92,7 +92,8 @@ export class Repository {
                 throw new Error("Invalid date format for daily data. Expected format: YYYY-MM-DD");
             }
             this.externalStorage.setData(`daily:${date}`, JSON.stringify(data));
-            this.saveLastRecurringTasks(data.recurringTasks);
+            await this.saveLastRecurringTasks(data.recurringTasks);
+            await this.saveLastDailyTasks(data.temporaryTasks);
         } catch (error) {
             console.error("Error saving daily data to externalStorage:", error);
             alert("Не удалось сохранить данные в локальное хранилище");
@@ -105,7 +106,7 @@ export class Repository {
 
         const allItems = await this.externalStorage.getAllData();
 
-        const keys = Object.keys(allItems)
+        Object.keys(allItems)
             .filter(key => key.startsWith(`daily:`))
             .map(key => JSON.parse(allItems[key] || '{}'))
             .filter((data: DailyStoredData) =>
@@ -139,6 +140,22 @@ export class Repository {
         }
     }
 
+    private async getLastDailyTasks(): Promise<DailyStoredData["temporaryTasks"] | null> {
+        try {
+            const rawData = await this.externalStorage.getData(`last-daily-tasks`);
+            if (!rawData) {
+                return null;
+            }
+
+            const tasks = JSON.parse(rawData) as DailyStoredData["temporaryTasks"];
+            return tasks;
+        } catch (error) {
+            console.error("Error parsing last daily tasks from externalStorage:", error);
+            alert("Не удалось загрузить последние временные задачи из локального хранилища");
+            return null;
+        }
+    }
+
     public async getAllMonthlyForStatistics(): Promise<MonthlyStoredData[]> {
         const allItems = await this.externalStorage.getAllData();
         const monthlyData = Object.keys(allItems)
@@ -167,6 +184,16 @@ export class Repository {
             console.error("Error saving last recurring tasks to externalStorage:", error);
             alert("Не удалось сохранить последние повторяющиеся задачи в локальное хранилище");
             throw new Error("Failed to save last recurring tasks");
+        }
+    }
+
+    public async saveLastDailyTasks(temporaryTasks: DailyStoredData["temporaryTasks"]): Promise<void> {
+        try {
+            await this.externalStorage.setData(`last-daily-tasks`, JSON.stringify(temporaryTasks));
+        } catch (error) {
+            console.error("Error saving last daily tasks to externalStorage:", error);
+            alert("Не удалось сохранить последние временные задачи в локальное хранилище");
+            throw new Error("Failed to save last daily tasks");
         }
     }
 }
