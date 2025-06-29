@@ -1,5 +1,6 @@
 import './simple-modal.scss';
 import Modal from 'react-modal';
+import { Zoomable } from '../zoomable/zoomable';
 
 export interface SimpleModalProps {
     title: string;
@@ -25,8 +26,10 @@ export const SimpleModal: React.FC<SimpleModalProps> = (props) => (
             </button>
         </div>
 
-        <div className="simple-modal-content">
-            {props.children}
-        </div>
+        <Zoomable>
+            <div className="simple-modal-content">
+                {props.children}
+            </div>
+        </Zoomable>
     </Modal>
 );

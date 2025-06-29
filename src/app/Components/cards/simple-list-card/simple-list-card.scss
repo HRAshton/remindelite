@@ -2,7 +2,8 @@
     .simple-list-card-items {
         padding-inline-start: 1em;
         margin: 0;
-        overflow: auto;
+        overflow: visible;
+        max-height: none;
     }
 
     .simple-list-card-item {

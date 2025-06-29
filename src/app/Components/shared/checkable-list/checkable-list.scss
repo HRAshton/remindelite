@@ -2,8 +2,9 @@
     .checkable-list-items {
         padding-inline-start: 1em;
         margin: 0;
-        overflow: auto;
+        overflow: visible;
         padding: 0;
+        max-height: none;
     }
 
     .checkable-list-item {
