@@ -4,9 +4,9 @@
     overflow: hidden;
     position: relative;
 
-    cursor: grab;
     &.dragging {
         cursor: grabbing;
+        user-select: none;
     }
 
     .zoomable-content {

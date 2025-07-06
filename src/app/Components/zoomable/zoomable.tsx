@@ -57,7 +57,8 @@ export const Zoomable = ({ children, className = '' }: ZoomableProps) => {
         };
 
         const onMouseDown = (e: MouseEvent) => {
-            e.preventDefault();
+            if (e.button !== 0) return; // Only handle left mouse button
+            if (!e.ctrlKey) return; // Only allow dragging when Ctrl is pressed
             setState((prev) => ({
                 ...prev,
                 isDragging: true,
@@ -89,6 +90,12 @@ export const Zoomable = ({ children, className = '' }: ZoomableProps) => {
                 }));
             }
         };
+
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.ctrlKey) {
+                e.preventDefault();
+            }
+        }
 
         container.addEventListener('wheel', onWheel, { passive: false });
         container.addEventListener('mousedown', onMouseDown);
